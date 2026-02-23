@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        text-align: center;
+      }
+
+      input,
+      select,
+      button {
+        padding: 8px;
+        margin: 5px 0;
+      }
+
+      .task {
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .task.completed {
+        text-decoration: line-through;
+        opacity: 0.6;
+      }
+
+      .high {
+        border-left: 6px solid red;
+      }
+      .low {
+        border-left: 6px solid green;
+      }
+
+      .actions button {
+        margin-left: 5px;
+        cursor: pointer;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h2>Task Manager</h2>
+
+      <!-- ADD TASK -->
+      <input id="title" placeholder="Title (required)" />
+      <input id="desc" placeholder="Description (optional)" />
+      <input type="date" id="dueDate" />
+
+      <select id="priority">
+        <option value="low">Low Priority</option>
+        <option value="high">High Priority</option>
+      </select>
+
+      <button onclick="addTask()">Add Task</button>
+
+      <!-- SEARCH + FILTER + SORT -->
+      <div class="controls">
+        <input id="search" placeholder="Search task..." />
+
+        <select id="filter">
+          <option value="all">All</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+          <option value="high">High Priority</option>
+        </select>
+
+        <select id="sort">
+          <option value="created">Sort: Created Date</option>
+          <option value="due">Sort: Due Date</option>
+          <option value="priority">Sort: Priority</option>
+        </select>
+      </div>
+
+      <div id="taskList"></div>
+    </div>
+
+    <script src="todotask.js"></script>
+  </body>
+</html>
