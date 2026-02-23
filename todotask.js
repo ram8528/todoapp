@@ -36,7 +36,6 @@ function clearInputs(){
     document.getElementById("dueDate").value="";
 }
 
-
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter") addTask();
 });
@@ -84,7 +83,6 @@ document.getElementById("search").addEventListener("input", (e) => {
     renderTasks();
   }, 400);
 });
-
 
 document.getElementById("filter").onchange = renderTasks;
 document.getElementById("sort").onchange = renderTasks;
@@ -152,3 +150,193 @@ function renderTasks() {
 }
 
 renderTasks();
+
+
+{/* <div> */}
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let searchText = "";
+
+const filterSelect = document.getElementById("filter");
+const sortSelect = document.getElementById("sort");
+const taskList = document.getElementById("taskList");
+
+/* ================= STORAGE ================= */
+
+function saveTasks() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+/* ================= HELPERS ================= */
+
+function createTask(title, desc, dueDate, priority) {
+  return {
+    id: Date.now(),
+    title,
+    desc,
+    dueDate,
+    priority,
+    completed: false,
+    createdAt: Date.now(),
+  };
+}
+
+function clearInputs() {
+  document.getElementById("title").value = "";
+  document.getElementById("desc").value = "";
+  document.getElementById("dueDate").value = "";
+}
+
+function updateUI() {
+  saveTasks();
+  renderTasks();
+}
+
+/* ================= ADD TASK ================= */
+
+function addTask() {
+  const title = document.getElementById("title").value.trim();
+  if (!title) return alert("Title required");
+
+  tasks.push(
+    createTask(
+      title,
+      document.getElementById("desc").value,
+      document.getElementById("dueDate").value,
+      document.getElementById("priority").value,
+    ),
+  );
+
+  clearInputs();
+  updateUI();
+}
+
+/* ENTER KEY SUBMIT */
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addTask();
+});
+
+/* ================= DELETE ================= */
+
+function deleteTask(id) {
+  if (!confirm("Delete this task?")) return;
+  tasks = tasks.filter((t) => t.id !== id);
+  updateUI();
+}
+
+/* ================= EDIT ================= */
+
+function editTask(id) {
+  const task = tasks.find((t) => t.id === id);
+
+  const newTitle = prompt("Edit title", task.title);
+  if (newTitle === null) return;
+
+  const newDesc = prompt("Edit description", task.desc);
+
+  task.title = newTitle;
+  task.desc = newDesc;
+
+  updateUI();
+}
+
+/* ================= COMPLETE ================= */
+
+function toggleComplete(id) {
+  const task = tasks.find((t) => t.id === id);
+  task.completed = !task.completed;
+  updateUI();
+}
+
+/* ================= SEARCH (DEBOUNCE) ================= */
+
+let debounceTimer;
+
+document.getElementById("search").addEventListener("input", (e) => {
+  clearTimeout(debounceTimer);
+
+  debounceTimer = setTimeout(() => {
+    searchText = e.target.value.toLowerCase();
+    renderTasks();
+  }, 400);
+});
+
+/* ================= FILTER ================= */
+
+function getFilteredTasks() {
+  let result = [...tasks];
+
+  if (searchText) {
+    result = result.filter((t) => t.title.toLowerCase().includes(searchText));
+  }
+
+  const filter = filterSelect.value;
+
+  if (filter === "completed") result = result.filter((t) => t.completed);
+
+  if (filter === "pending") result = result.filter((t) => !t.completed);
+
+  if (filter === "high") result = result.filter((t) => t.priority === "high");
+
+  return result;
+}
+
+/* ================= SORT ================= */
+
+function sortTasks(list) {
+  const sort = sortSelect.value;
+
+  if (sort === "created") list.sort((a, b) => a.createdAt - b.createdAt);
+
+  if (sort === "due")
+    list.sort((a, b) =>
+      (a.dueDate || "9999") > (b.dueDate || "9999") ? 1 : -1,
+    );
+
+  if (sort === "priority")
+    list.sort((a, b) => (a.priority === "high" ? -1 : 1));
+
+  /* completed bottom */
+  list.sort((a, b) => a.completed - b.completed);
+
+  return list;
+}
+
+/* ================= UI ================= */
+
+function createTaskElement(task) {
+  const div = document.createElement("div");
+  div.className = `task ${task.priority} ${task.completed ? "completed" : ""}`;
+
+  div.innerHTML = `
+        <div>
+            <input type="checkbox"
+            ${task.completed ? "checked" : ""}
+            onchange="toggleComplete(${task.id})">
+
+            <strong>${task.title}</strong><br>
+            <small>${task.desc || ""}</small><br>
+            <small>Due: ${task.dueDate || "N/A"}</small>
+        </div>
+
+        <div>
+            <button onclick="editTask(${task.id})">Edit</button>
+            <button onclick="deleteTask(${task.id})">Delete</button>
+        </div>
+    `;
+
+  taskList.appendChild(div);
+}
+
+function renderTasks() {
+  let list = getFilteredTasks();
+  list = sortTasks(list);
+
+  taskList.innerHTML = "";
+  list.forEach(createTaskElement);
+}
+
+/* INITIAL LOAD */
+renderTasks();
+
+
+</div>
