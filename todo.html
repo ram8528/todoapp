@@ -1,77 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Todo App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Manager</title>
 
-    <style>
-        body{
-            font-family: Arial;
-            background:#f4f4f4;
-            display:flex;
-            justify-content:center;
-            margin-top:50px;
-        }
+<style>
+body{
+    font-family: Arial;
+    background:#f4f6f8;
+    padding:20px;
+}
 
-        .container{
-            background:white;
-            padding:20px;
-            width:400px;
-            border-radius:8px;
-            box-shadow:0 0 10px rgba(0,0,0,0.1);
-        }
+.container{
+    max-width:800px;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
 
-        h2{
-            text-align:center;
-        }
+input,select,button{
+    padding:8px;
+    margin:5px 0;
+}
 
-        input{
-            width:70%;
-            padding:8px;
-        }
+.task{
+    border:1px solid #ddd;
+    padding:10px;
+    margin-top:10px;
+    border-radius:6px;
+    display:flex;
+    justify-content:space-between;
+}
 
-        button{
-            padding:8px 10px;
-            cursor:pointer;
-        }
+.completed{
+    text-decoration:line-through;
+    opacity:0.6;
+}
 
-        ul{
-            list-style:none;
-            padding:0;
-        }
+.high{border-left:6px solid red;}
+.low{border-left:6px solid green;}
 
-        li{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            margin-top:10px;
-            padding:8px;
-            background:#eee;
-            border-radius:5px;
-        }
-
-        .done{
-            text-decoration: line-through;
-            color:gray;
-        }
-
-        .actions button{
-            margin-left:5px;
-        }
-    </style>
+img{
+    margin-top:5px;
+    border-radius:6px;
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
-    <h2>Todo App</h2>
 
-    <input type="text" id="taskInput" placeholder="Enter task">
-    <button id="addBtn">Add</button>
+<h2>User Profile</h2>
 
-    <ul id="taskList"></ul>
+<input type="file" id="profileInput" accept="image/*">
+<br>
+<img id="profilePreview" width="120" style="display:none;border-radius:50%">
+<br>
+<button onclick="removeProfile()">Remove Image</button>
+
+<hr>
+
+<h2>Task Manager</h2>
+
+<input id="title" placeholder="Title (required)">
+<input id="desc" placeholder="Description">
+<input type="date" id="dueDate">
+
+<select id="priority">
+<option value="low">Low Priority</option>
+<option value="high">High Priority</option>
+</select>
+
+<input type="file" id="taskImage" accept="image/*">
+
+<button onclick="addTask()">Add Task</button>
+
+<div id="taskList"></div>
+
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
