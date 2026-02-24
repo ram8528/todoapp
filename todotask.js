@@ -1,89 +1,175 @@
-// Load tasks from storage
+/* ===============================
+   USER PROFILE IMAGE
+=================================*/
+
+const profileInput = document.getElementById("profileInput");
+const profilePreview = document.getElementById("profilePreview");
+
+// load saved image
+const savedProfile = localStorage.getItem("profileImage");
+if(savedProfile){
+    profilePreview.src = savedProfile;
+    profilePreview.style.display="block";
+}
+
+// upload profile
+profileInput.addEventListener("change",function(){
+    const file = this.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+        profilePreview.src = e.target.result;
+        profilePreview.style.display="block";
+        localStorage.setItem("profileImage", e.target.result);
+    };
+
+    reader.readAsDataURL(file);
+});
+
+// remove profile
+function removeProfile(){
+    if(!confirm("Remove profile image?")) return;
+
+    localStorage.removeItem("profileImage");
+    profilePreview.style.display="none";
+    profileInput.value="";
+}
+
+
+/* ===============================
+   TASK MANAGER
+=================================*/
+
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
-// Select elements
-const input = document.getElementById("taskInput");
-const addBtn = document.getElementById("addBtn");
-const taskList = document.getElementById("taskList");
-
-
-// Render tasks
-function renderTasks(){
-
-    taskList.innerHTML = "";
-
-    tasks.forEach((task,index)=>{
-
-        const li = document.createElement("li");
-
-        li.innerHTML = `
-            <span class="${task.done ? 'done' : ''}">
-                ${task.text}
-            </span>
-
-            <div class="actions">
-                <button data-action="toggle">✔</button>
-                <button data-action="edit">Edit</button>
-                <button data-action="delete">Delete</button>
-            </div>
-        `;
-
-        li.dataset.index = index;
-        taskList.appendChild(li);
-    });
-
+function saveTasks(){
     localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-
-// Add task
+/* ADD TASK */
 function addTask(){
-    if(!input.value.trim()) return;
 
-    tasks.push({
-        text: input.value,
-        done:false
-    });
+    const title = document.getElementById("title").value.trim();
+    if(!title){
+        alert("Title required");
+        return;
+    }
 
-    input.value="";
+    const imageFile = document.getElementById("taskImage").files[0];
+
+    function createTask(imageData=null){
+
+        const task = {
+            id: Date.now(),
+            title:title,
+            desc:desc.value,
+            dueDate:dueDate.value,
+            priority:priority.value,
+            image:imageData,
+            completed:false,
+            createdAt:Date.now()
+        };
+
+        tasks.push(task);
+        saveTasks();
+        clearInputs();
+        renderTasks();
+    }
+
+    if(imageFile){
+        const reader = new FileReader();
+
+        reader.onload = function(e){
+            createTask(e.target.result);
+        };
+
+        reader.readAsDataURL(imageFile);
+    }else{
+        createTask();
+    }
+}
+
+/* CLEAR INPUTS */
+function clearInputs(){
+    title.value="";
+    desc.value="";
+    dueDate.value="";
+    taskImage.value="";
+}
+
+/* DELETE TASK */
+function deleteTask(id){
+    if(!confirm("Delete task?")) return;
+
+    tasks = tasks.filter(t=>t.id!==id);
+    saveTasks();
     renderTasks();
 }
 
-
-// Add button click
-addBtn.addEventListener("click", addTask);
-
-
-// Handle edit/delete/toggle (Event Delegation)
-taskList.addEventListener("click", function(e){
-
-    const action = e.target.dataset.action;
-    const index = e.target.closest("li").dataset.index;
-
-    if(action === "delete"){
-        if(confirm("Delete this task?")){
-            tasks.splice(index,1);
-        }
-    }
-
-    if(action === "edit"){
-        const newText = prompt("Edit task", tasks[index].text);
-        if(newText) tasks[index].text = newText;
-    }
-
-    if(action === "toggle"){
-        tasks[index].done = !tasks[index].done;
-    }
-
+/* TOGGLE COMPLETE */
+function toggleComplete(id){
+    const task = tasks.find(t=>t.id===id);
+    task.completed = !task.completed;
+    saveTasks();
     renderTasks();
-});
+}
 
+/* EDIT TASK */
+function editTask(id){
+    const task = tasks.find(t=>t.id===id);
 
-// Enter key support
-input.addEventListener("keypress", function(e){
-    if(e.key === "Enter") addTask();
-});
+    const newTitle = prompt("Edit title",task.title);
+    if(newTitle===null) return;
 
+    const newDesc = prompt("Edit description",task.desc);
 
-// Initial load
+    task.title=newTitle;
+    task.desc=newDesc;
+
+    saveTasks();
+    renderTasks();
+}
+
+/* RENDER TASKS */
+function renderTasks(){
+
+    const list=document.getElementById("taskList");
+    list.innerHTML="";
+
+    const sorted=[...tasks].sort((a,b)=>a.completed-b.completed);
+
+    sorted.forEach(task=>{
+
+        const div=document.createElement("div");
+        div.className=`task ${task.priority} ${task.completed?'completed':''}`;
+
+        div.innerHTML=`
+        <div>
+            <input type="checkbox"
+            ${task.completed?'checked':''}
+            onchange="toggleComplete(${task.id})">
+
+            <strong>${task.title}</strong><br>
+            <small>${task.desc||""}</small><br>
+            <small>Due: ${task.dueDate||"N/A"}</small><br>
+
+            ${
+                task.image
+                ? `<img src="${task.image}" width="80">`
+                : ""
+            }
+        </div>
+
+        <div>
+            <button onclick="editTask(${task.id})">Edit</button>
+            <button onclick="deleteTask(${task.id})">Delete</button>
+        </div>
+        `;
+
+        list.appendChild(div);
+    });
+}
+
 renderTasks();
